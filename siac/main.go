@@ -9,8 +9,8 @@ import (
 	"os"
 	"reflect"
 
-	"github.com/bgentry/speakeasy"
 	"github.com/spf13/cobra"
+	"golang.org/x/crypto/ssh/terminal"
 
 	"github.com/NebulousLabs/Sia/api"
 	"github.com/NebulousLabs/Sia/build"
@@ -80,10 +80,12 @@ func apiGet(call string) (*http.Response, error) {
 		if apiPassword == "" {
 			// prompt for password and store it in a global var for subsequent
 			// calls
-			apiPassword, err = speakeasy.Ask("API password: ")
+			fmt.Print("API password: ")
+			passwordBytes, err := terminal.ReadPassword(0)
 			if err != nil {
 				return nil, err
 			}
+			apiPassword = string(passwordBytes)
 		}
 		resp, err = api.HttpGETAuthenticated("http://"+addr+call, apiPassword)
 		if err != nil {
@@ -149,11 +151,12 @@ func apiPost(call, vals string) (*http.Response, error) {
 	if resp.StatusCode == http.StatusUnauthorized {
 		resp.Body.Close()
 		// Prompt for password and retry request with authentication.
-		password, err := speakeasy.Ask("API password: ")
+		fmt.Print("API password: ")
+		password, err := terminal.ReadPassword(0)
 		if err != nil {
 			return nil, err
 		}
-		resp, err = api.HttpPOSTAuthenticated("http://"+addr+call, vals, password)
+		resp, err = api.HttpPOSTAuthenticated("http://"+addr+call, vals, string(password))
 		if err != nil {
 			return nil, errors.New("no response from daemon - authentication failed")
 		}

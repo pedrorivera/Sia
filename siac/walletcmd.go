@@ -5,8 +5,8 @@ import (
 	"math/big"
 	"os"
 
-	"github.com/bgentry/speakeasy"
 	"github.com/spf13/cobra"
+	"golang.org/x/crypto/ssh/terminal"
 
 	"github.com/NebulousLabs/Sia/api"
 	"github.com/NebulousLabs/Sia/types"
@@ -201,11 +201,13 @@ func walletaddressescmd() {
 
 // walletchangepasswordcmd changes the password of the wallet.
 func walletchangepasswordcmd() {
-	currentPassword, err := speakeasy.Ask(currentPasswordText)
+	fmt.Print(currentPasswordText)
+	currentPassword, err := terminal.ReadPassword(0)
 	if err != nil {
 		die("Reading password failed:", err)
 	}
-	newPassword, err := speakeasy.Ask(newPasswordText)
+	fmt.Print(newPasswordText)
+	newPassword, err := terminal.ReadPassword(0)
 	if err != nil {
 		die("Reading password failed:", err)
 	}
@@ -222,7 +224,8 @@ func walletinitcmd() {
 	var er api.WalletInitPOST
 	qs := fmt.Sprintf("dictionary=%s", "english")
 	if initPassword {
-		password, err := speakeasy.Ask("Wallet password: ")
+		fmt.Print("Wallet password: ")
+		password, err := terminal.ReadPassword(0)
 		if err != nil {
 			die("Reading password failed:", err)
 		}
@@ -245,13 +248,15 @@ func walletinitcmd() {
 
 // walletinitseedcmd initializes the wallet from a preexisting seed.
 func walletinitseedcmd() {
-	seed, err := speakeasy.Ask("Seed: ")
+	fmt.Print("Seed: ")
+	seed, err := terminal.ReadPassword(0)
 	if err != nil {
 		die("Reading seed failed:", err)
 	}
 	qs := fmt.Sprintf("&seed=%s&dictionary=%s", seed, "english")
 	if initPassword {
-		password, err := speakeasy.Ask("Wallet password: ")
+		fmt.Print("Wallet password: ")
+		password, err := terminal.ReadPassword(0)
 		if err != nil {
 			die("Reading password failed:", err)
 		}
@@ -273,7 +278,8 @@ func walletinitseedcmd() {
 
 // walletload033xcmd loads a v0.3.3.x wallet into the current wallet.
 func walletload033xcmd(source string) {
-	password, err := speakeasy.Ask(askPasswordText)
+	fmt.Print(askPasswordText)
+	password, err := terminal.ReadPassword(0)
 	if err != nil {
 		die("Reading password failed:", err)
 	}
@@ -287,11 +293,13 @@ func walletload033xcmd(source string) {
 
 // walletloadseedcmd adds a seed to the wallet's list of seeds
 func walletloadseedcmd() {
-	seed, err := speakeasy.Ask("New seed: ")
+	fmt.Print("New seed: ")
+	seed, err := terminal.ReadPassword(0)
 	if err != nil {
 		die("Reading seed failed:", err)
 	}
-	password, err := speakeasy.Ask(askPasswordText)
+	fmt.Print(askPasswordText)
+	password, err := terminal.ReadPassword(0)
 	if err != nil {
 		die("Reading password failed:", err)
 	}
@@ -305,7 +313,8 @@ func walletloadseedcmd() {
 
 // walletloadsiagcmd loads a siag key set into the wallet.
 func walletloadsiagcmd(keyfiles string) {
-	password, err := speakeasy.Ask(askPasswordText)
+	fmt.Print(askPasswordText)
+	password, err := terminal.ReadPassword(0)
 	if err != nil {
 		die("Reading password failed:", err)
 	}
@@ -419,7 +428,8 @@ Estimated Fee:       %v / KB
 
 // walletsweepcmd sweeps coins and funds from a seed.
 func walletsweepcmd() {
-	seed, err := speakeasy.Ask("Seed: ")
+	fmt.Print("Seed: ")
+	seed, err := terminal.ReadPassword(0)
 	if err != nil {
 		die("Reading seed failed:", err)
 	}
@@ -507,10 +517,12 @@ func walletunlockcmd() {
 			return
 		}
 	}
-	password, err := speakeasy.Ask("Wallet password: ")
+	fmt.Print("Wallet password: ")
+	passwordBytes, err := terminal.ReadPassword(0)
 	if err != nil {
 		die("Reading password failed:", err)
 	}
+	password = string(passwordBytes)
 	qs := fmt.Sprintf("encryptionpassword=%s&dictonary=%s", password, "english")
 	err = post("/wallet/unlock", qs)
 	if err != nil {

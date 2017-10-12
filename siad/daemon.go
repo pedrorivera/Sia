@@ -23,8 +23,8 @@ import (
 	"github.com/NebulousLabs/Sia/modules/wallet"
 	"github.com/NebulousLabs/Sia/profile"
 
-	"github.com/bgentry/speakeasy"
 	"github.com/spf13/cobra"
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 // verifyAPISecurity checks that the security values are consistent with a
@@ -114,10 +114,12 @@ func processConfig(config Config) (Config, error) {
 func startDaemon(config Config) (err error) {
 	// Prompt user for API password.
 	if config.Siad.AuthenticateAPI {
-		config.APIPassword, err = speakeasy.Ask("Enter API password: ")
+		fmt.Print("Enter API password: ")
+		passwordBytes, err := terminal.ReadPassword(0)
 		if err != nil {
 			return err
 		}
+		config.APIPassword = string(passwordBytes)
 		if config.APIPassword == "" {
 			return errors.New("password cannot be blank")
 		}
